@@ -1,10 +1,16 @@
-import { addTarefa, deleteTarefa, getTarefas, updateTarefa } from "@/api";
+import {
+  addTarefa,
+  deleteTarefa,
+  getTarefas,
+  updateTarefa,
+} from "@/services/tarefaService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Alert,
   Button,
   FlatList,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -14,6 +20,8 @@ import { CardTarefa } from "../components/CardTarefa";
 
 export default function TelaTarefas() {
   const [descricao, setDescricao] = useState("");
+  const [editando, setEditando] = useState(null);
+  const [novaDescricao, setNovaDescricao] = useState("");
   const queryClient = useQueryClient();
   const { isPending, error, data, isFetching } = useQuery({
     queryKey: ["tarefas"],
@@ -61,10 +69,28 @@ export default function TelaTarefas() {
   function handleDelete(tarefa) {
     deleteMutation.mutate(tarefa);
   }
+ 
+   function handleEdit(tarefa) {
+     setEditando(tarefa);
+     setNovaDescricao(tarefa.descricao);
+   }
+ 
+   function handleUpdate() {
+     if (!novaDescricao.trim()) {
+       Alert.alert("Atenção", "A descrição não pode estar vazia");
+       return;
+     }
+     updateMutation.mutate({
+       ...editando,
+       descricao: novaDescricao,
+     });
+     setEditando(null);
+     setNovaDescricao("");
+   }
 
-  return (
-    <View style={styles.container}>
-      <View style={styles.inputView}>
+   return (
+     <View style={styles.container}>
+       <View style={styles.inputView}>
         <TextInput
           style={styles}
           placeholder="Descrição"
@@ -77,12 +103,13 @@ export default function TelaTarefas() {
         style={{ flex: 1, width: "100%" }}
         contentContainerStyle={styles.list}
         data={data}
-        keyExtractor={(item) => item.objectId}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <CardTarefa
             tarefa={item}
             onToggle={handleToggle}
-            onPress={handleDelete}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
           />
         )}
       />
@@ -93,6 +120,26 @@ export default function TelaTarefas() {
           {isFetching && <Text>Atualizando...</Text>}
         </View>
       )}
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editando !== null}
+        onRequestClose={() => setEditando(null)}
+      >
+        <View style={styles.modalView}>
+          <Text style={styles.modalText}>Editar Tarefa</Text>
+          <TextInput
+            style={styles.input}
+            onChangeText={setNovaDescricao}
+            value={novaDescricao}
+          />
+          <View style={styles.modalButtons}>
+            <Button title="Salvar" onPress={handleUpdate} />
+            <Button title="Cancelar" onPress={() => setEditando(null)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -132,5 +179,31 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 10,
     marginTop: 10,
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
+    fontSize: 18,
+    fontWeight: "bold",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    width: "60%",
   },
 });
