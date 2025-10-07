@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Expo + React Native",
-    "slug": "pdm-2025-2",
+    "slug": "taskapp-integrated2express",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -44,10 +44,11 @@
     },
     "extra": {
       "eas": {
-        "projectId": "35aae221-2f3c-4cba-a266-939001718d54"
-      }
+        "projectId": "2e6493c9-fe4f-4e86-9db8-b0eafbd961e2"
+      },
+      "router": {}
     },
-    "owner": "marciobueno1",
+    "owner": "capella-marcosfilipe",
     "updates": {
       "url": "https://u.expo.dev/35aae221-2f3c-4cba-a266-939001718d54"
     },
